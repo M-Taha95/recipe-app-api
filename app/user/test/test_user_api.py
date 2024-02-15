@@ -85,10 +85,7 @@ class PublicUserApiTests(TestCase):
 
     def test_create_token_bad_credentials(self):
         """Test returns error if credentials invalid."""
-        create_user(
-            email="test@example.com",
-            password="goodpass"
-        )
+        create_user(email="test@example.com", password="goodpass")
 
         payload = {
             "email": "test@example.com",
@@ -143,8 +140,7 @@ class PrivateUserApiTests(TestCase):
         """Test POST in not allowed for the me endspoint."""
         res = self.client.post(ME_URL, {})
 
-        self.assertEqual(res.status_code,
-                        status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_update_user_profile(self):
         """Test upating the user profile for the authenticated user."""
