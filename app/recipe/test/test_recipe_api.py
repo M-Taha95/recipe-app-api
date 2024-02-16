@@ -14,9 +14,9 @@ from recipe.serializers import RecipeSerializer, RecipeDetailSerializer
 RECIPE_URL = reverse("recipe:recipe-list")
 
 
-def detail_url(self):
+def detail_url(recipe_id):
     """Create and return recipe detail URL"""
-    return reverse('recipe:recipe-detail',  args=[recipe_id])
+    return reverse("recipe:recipe-detail", args=[recipe_id])
 
 
 def create_recipe(user, **params):
@@ -31,6 +31,11 @@ def create_recipe(user, **params):
     defaults.update(params)
     recipe = Recipe.objects.create(user=user, **defaults)
     return recipe
+
+
+def create_user(self, **params):
+    """Test for creating and return a new user."""
+    return get_user_model().objects.create_user(**params)
 
 
 class PublicRecipeApiTest(TestCase):
@@ -93,3 +98,36 @@ class PrivateRecipeApiTest(TestCase):
 
         serializer = RecipeDetailSerializer(recipe)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_recipe(self):
+        """Test creating a recipe"""
+        payload = {
+            "title": "sample recipe",
+            "time_minutes": 30,
+            "price": Decimal("5.99"),
+        }
+        res = self.client.post(RECIPE_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data["id"])
+        for key, value in payload.items():
+            self.assertEqual(getattr(recipe, key), value)
+        self.assertEqual(recipe.user, self.user)
+
+    def test_partial_update(self):
+        """Test partisl update of a recipe."""
+        original_link = "https://example.com/recipe.pdf"
+        recipe = create_recipe(
+            user=self.user,
+            title="Sample recipe title",
+            link=original_link,
+        )
+
+        payload = {"title": "New recipe title"}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.title, payload["title"])
+        self.assertEqual(recipe.link, original_link)
+        self.assertEqual(recipe.user, self.user)
