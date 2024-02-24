@@ -8,7 +8,8 @@ from recipe import views
 
 router = DefaultRouter()
 router.register("recipes", views.RecipeViewSet)
-router.register("tag", views.TagViewtSet)
+router.register("tags", views.TagViewtSet)
+router.register("Ingredients", views.IngredientViewSet)
 
 app_name = "recipe"
 

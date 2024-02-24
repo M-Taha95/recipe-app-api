@@ -1,6 +1,7 @@
 """
 Database models.
 """
+
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import (
@@ -17,10 +18,7 @@ class UserManager(BaseUserManager):
         """Create, save and return a new user"""
         if not email:
             raise ValueError("User must have a valid email address!")
-        user = self.model(
-            email=self.normalize_email(email),
-            **extra_fields
-        )
+        user = self.model(email=self.normalize_email(email), **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
 
@@ -48,25 +46,29 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
 
+
 class Recipe(models.Model):
     """Recipe objects"""
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete = models.CASCADE
+        on_delete=models.CASCADE
     )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     time_minutes = models.IntegerField()
     price = models.DecimalField(max_digits=5, decimal_places=2)
     link = models.CharField(max_length=255, blank=True)
-    tag = models.ManyToManyField('Tag')
+    tag = models.ManyToManyField("Tag")
+    ingredient = models.ManyToManyField("Ingredient")
 
     def __str__(self):
-        return f'{self.title}'
+        return f"{self.title}"
 
 
 class Tag(models.Model):
     """Tag for filtering recipes."""
+
     name = models.CharField(max_length=255)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -74,4 +76,17 @@ class Tag(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name}'
+        return f"{self.name}"
+
+
+class Ingredient(models.Model):
+    """Ingredient for filtering recipe."""
+
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return f"{self.name}"
