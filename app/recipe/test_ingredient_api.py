@@ -7,7 +7,6 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from app.recipe.test.test_recipe_api import create_user
 from core.models import Ingredient
 from recipe.serializers import IngredientSerializer
 
