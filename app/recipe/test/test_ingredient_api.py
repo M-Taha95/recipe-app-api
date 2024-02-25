@@ -20,7 +20,9 @@ def detial_url(ingredient_id):
 
 def create_useR(email="test@example.com", password="testpass123"):
     """Creating and return a new user."""
-    return get_user_model().objects.create_user(email=email, password=password)
+    return get_user_model().objects.create_user(
+        email=email, password=password
+    )
 
 
 class PublicIngredientTest(TestCase):
@@ -61,9 +63,14 @@ class PrivateIngredientTest(TestCase):
 
     def test_ingredient_list_limied_to_user(self):
         """Test list of an ingredients is limited to authenticated users."""
-        user2 = create_user(email="user2@example.com")
-        Ingredient.objects.create(email=user2, name="Salt")
-        ingredient = Ingredient.objects.create(user=self.user, name="Pepper")
+        user2 = get_user_model().objects.create_user(
+            'user2@example.com',
+            'testpass123',
+        )
+        Ingredient.objects.create(user=user2, name="Salt")
+        ingredient = Ingredient.objects.create(
+            user=self.user, name="Pepper"
+        )
 
         res = self.client.get(INGREDIENT_URL)
 
@@ -71,3 +78,28 @@ class PrivateIngredientTest(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]["name"], ingredient.name)
         self.assertEqual(res.data[0]["id"], ingredient.id)
+
+    def test_update_ingredient(self):
+        """Test for updaing an ingredients."""
+        ingredient = Ingredient.objects.create(
+            user=self.user, name='Cilantro'
+        )
+        payload = {'name':'Coriander'}
+        url = detial_url(ingredient.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        ingredient.refresh_from_db()
+        self.assertEqual(ingredient.name, payload['name'])
+
+    def test_delete_ingrediant(self):
+        """Test for deleting an ingredients."""
+        ingredient = Ingredient.objects.create(
+            user=self.user, name='Taha'
+        )
+        url = detial_url(ingredient.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        ingredient = Ingredient.objects.filter(user=self.user)
+        self.assertFalse(ingredient.exists())

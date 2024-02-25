@@ -20,7 +20,9 @@ def detail_url(tag_id):
 
 def create_user(email="test@example.com", password="testpass123"):
     """Creating and return a new user."""
-    return get_user_model().objects.create_user(email=email, password=password)
+    return get_user_model().objects.create_user(
+        email=email, password=password
+    )
 
 
 class PublicTagApiTest(TestCase):
@@ -65,7 +67,9 @@ class PrivateTagApiTest(TestCase):
             "password123",
         )
         Tag.objects.create(user=other_user, name="Fruity")
-        tags = Tag.objects.create(user=self.user, name="Comfort Food")
+        tags = Tag.objects.create(
+            user=self.user, name="Comfort Food"
+        )
         res = self.client.get(TAGS_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -75,7 +79,9 @@ class PrivateTagApiTest(TestCase):
 
     def test_update_tag(self):
         """Test update tags."""
-        tag = Tag.objects.create(user=self.user, name="After Dinner")
+        tag = Tag.objects.create(
+            user=self.user, name="After Dinner"
+        )
         payload = {"name": "Desert"}
         url = detail_url(tag.id)
         res = self.client.patch(url, payload)
@@ -86,7 +92,9 @@ class PrivateTagApiTest(TestCase):
 
     def test_delete_tags(self):
         """Test deleting a tag."""
-        tag = Tag.objects.create(user=self.user, name="Breakfast")
+        tag = Tag.objects.create(
+            user=self.user, name="Breakfast"
+        )
 
         url = detail_url(tag.id)
         res = self.client.delete(url)
