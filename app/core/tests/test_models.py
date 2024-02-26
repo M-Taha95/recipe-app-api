@@ -2,7 +2,6 @@
 Test for models.
 """
 
-
 from unittest.mock import patch
 from decimal import Decimal
 from django.test import TestCase
@@ -23,13 +22,11 @@ class ModelTest(TestCase):
         email = "test@example.com"
         password = "testpass123"
         user = get_user_model().objects.create_user(
-            email=email,
-            password=password
+            email=email, password=password
         )
 
         self.assertEqual(user.email, email)
         self.assertTrue(user.check_password(password))
-
 
     def test_new_user_email_normalized(self):
         """Test email is normalized for a new users"""
@@ -43,12 +40,10 @@ class ModelTest(TestCase):
             user = get_user_model().objects.create_user(email, "sample123")
             self.assertEqual(user.email, excepted)
 
-
     def test_new_user_without_email_raises_error(self):
         """Test that creating a user without an email raises a ValueError"""
         with self.assertRaises(ValueError):
             get_user_model().objects.create_user("", "test123")
-
 
     def test_create_superuser(self):
         """Test creating a superuser"""
@@ -58,7 +53,6 @@ class ModelTest(TestCase):
         )
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
-
 
     def test_cerate_recipe(self):
         """Test create recipe is successful."""
@@ -76,7 +70,6 @@ class ModelTest(TestCase):
 
         self.assertEqual(str(receip), receip.title)
 
-
     def test_create_tag(self):
         """Test for creating a tag successfull."""
         user = create_user()
@@ -84,24 +77,22 @@ class ModelTest(TestCase):
 
         self.assertEqual(str(tag), tag.name)
 
-
     def test_create_ingredients(self):
         """Test for creating an ingredient. successfull."""
         user = create_user()
         ingredient = models.Ingredient.objects.create(
             user=user,
-            name='Ingredient1',
+            name="Ingredient1",
         )
 
         self.assertEqual(str(ingredient), ingredient.name)
 
-
-    @patch('core.models.uuid.uuid4')
+    @patch("core.models.uuid.uuid4")
     def test_recipe_file_name_uuid(self, mock_uuid):
         """Test generating image path."""
-        uuid = 'test-uuid'
+        uuid = "test-uuid"
         mock_uuid.return_value = uuid
-        file_path = models.recipe_image_file_path(None, 'example.jpg')
+        file_path = models.recipe_image_file_path(None, "example.jpg")
 
-        self.assertEqual(file_path, f'uploads/recipe/{uuid}.jpg')
+        self.assertEqual(file_path, f"uploads/recipe/{uuid}.jpg")
         

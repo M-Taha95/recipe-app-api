@@ -2,7 +2,6 @@
 Test recipe API.
 """
 
-
 import os
 import tempfile
 from PIL import Image
@@ -13,7 +12,10 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import Recipe, Tag, Ingredient
-from recipe.serializers import RecipeSerializer, RecipeDetailSerializer
+from recipe.serializers import (
+    RecipeSerializer,
+    RecipeDetailSerializer
+)
 
 RECIPE_URL = reverse("recipe:recipe-list")
 
@@ -53,7 +55,6 @@ class PublicRecipeApiTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-
     def test_auth_required(self):
         """Test auth is required to call API."""
         res = self.client.get(RECIPE_URL)
@@ -72,7 +73,6 @@ class PrivateRecipeApiTest(TestCase):
         )
         self.client.force_authenticate(user=self.user)
 
-
     def test_retrieve_recipe(self):
         """Test a retrieveing a list of recipes."""
         create_recipe(user=self.user)
@@ -84,7 +84,6 @@ class PrivateRecipeApiTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, seralizer.data)
-
 
     def test_recipe_list_limited_to_user(self):
         """Test list of recipes is limited to authenticated users."""
@@ -102,7 +101,6 @@ class PrivateRecipeApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-
     def test_get_recipe_detail(self):
         """Test get recipe detail."""
         recipe = create_recipe(user=self.user)
@@ -111,7 +109,6 @@ class PrivateRecipeApiTest(TestCase):
 
         serializer = RecipeDetailSerializer(recipe)
         self.assertEqual(res.data, serializer.data)
-
 
     def test_create_recipe(self):
         """Test creating a recipe"""
@@ -126,7 +123,6 @@ class PrivateRecipeApiTest(TestCase):
         for key, value in payload.items():
             self.assertEqual(getattr(recipe, key), value)
         self.assertEqual(recipe.user, self.user)
-
 
     def test_partial_update(self):
         """Test partisl update of a recipe."""
@@ -194,7 +190,6 @@ class PrivateRecipeApiTest(TestCase):
             ).exists()
             self.assertTrue(exists)
 
-
     def test_creste_tag_on_update(self):
         """Test creating ta when updating a recipe."""
         recipe = create_recipe(user=self.user)
@@ -206,7 +201,6 @@ class PrivateRecipeApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         new_tag = Tag.objects.get(user=self.user, name="Lunch")
         self.assertIn(new_tag, recipe.tag.all())
-
 
     def test_update_recipe_assign_tag(self):
         """Test assigining an existing ta when updating a recipe."""
@@ -226,7 +220,6 @@ class PrivateRecipeApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(tag_lunch, recipe.tag.all())
         self.assertNotIn(tag_breakfast, recipe.tag.all())
-
 
     def test_clear_recipe_tags(self):
         """Test clearing a recipe tags."""
@@ -262,7 +255,6 @@ class PrivateRecipeApiTest(TestCase):
     #         ).exists()
     #         self.assertTrue(exists)
 
-
     def test_create_recipe_with_existing_ingredient(self):
         """Test creating a new recipe with existing ingredinet."""
         ingredient = Ingredient.objects.create(
@@ -289,7 +281,6 @@ class PrivateRecipeApiTest(TestCase):
             ).exists()
             self.assertTrue(exists)
 
-
     def test_creste_ingredient_on_update(self):
         """Test creating an ingredient when updating a recipe."""
         recipe = create_recipe(user=self.user)
@@ -303,7 +294,6 @@ class PrivateRecipeApiTest(TestCase):
             user=self.user, name="Limes"
         )
         self.assertIn(new_ingeredient, recipe.ingredient.all())
-
 
     def test_update_recipe_assign_ingredient(self):
         """Test assigining an existing an ingredient when updating a recipe."""
@@ -324,12 +314,10 @@ class PrivateRecipeApiTest(TestCase):
         self.assertIn(ingredient2, recipe.ingredient.all())
         self.assertNotIn(ingredient1, recipe.ingredient.all())
 
-
     def test_clear_recipe_ingredients(self):
         """Test clearing a recipe ingredients."""
-        ingredient = Ingredient.objects.create(
-            user=self.user, name="Garlic"
-        )
+        ingredient = Ingredient.objects.create()
+        user=self.user, name="Garlic"
         recipe = create_recipe(user=self.user)
         recipe.ingredient.add(ingredient)
 
@@ -347,32 +335,29 @@ class ImageUploadTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            'user@example.com',
-            'pass123',
+            "user@example.com",
+            "pass123",
         )
         self.client.force_authenticate(self.user)
         self.recipe = create_recipe(user=self.user)
 
-
     def tearDown(self):
         self.recipe.image.delete()
-
 
     def test_upload_image(self):
         """Test uploading an image to a recipe."""
         url = image_upload_url(self.recipe.id)
-        with tempfile.NamedTemporaryFile(suffix='.jpg') as image_file:
-            img = Image.new('RGB', (10, 10))
-            img.save(image_file, format='JPEG')
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as image_file:
+            img = Image.new("RGB", (10, 10))
+            img.save(image_file, format="JPEG")
             image_file.seek(0)
-            payload = {'image': image_file}
-            res = self.client.post(url, payload, format='multipart')
+            payload = {"image": image_file}
+            res = self.client.post(url, payload, format="multipart")
 
         self.recipe.refresh_from_db()
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn('image', res.data)
+        self.assertIn("image", res.data)
         self.assertTrue(os.path.exists(self.recipe.image.path))
-
 
     def test_upload_image_bad_request(self):
         """Test uploading invalid image."""
@@ -381,4 +366,3 @@ class ImageUploadTests(TestCase):
         res = self.client.post(url, payload, format="multipart")
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        
