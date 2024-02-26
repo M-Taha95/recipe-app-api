@@ -12,10 +12,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import Recipe, Tag, Ingredient
-from recipe.serializers import (
-    RecipeSerializer,
-    RecipeDetailSerializer
-)
+from recipe.serializers import RecipeSerializer, RecipeDetailSerializer
 
 RECIPE_URL = reverse("recipe:recipe-list")
 
@@ -167,9 +164,7 @@ class PrivateRecipeApiTest(TestCase):
 
     def test_create_recipe_with_existing_tags(self):
         """Test creating a recipe with existing tag."""
-        tag_indian = Tag.objects.create(
-            user=self.user, name="Indian"
-        )
+        tag_indian = Tag.objects.create(user=self.user, name="Indian")
         payload = {
             "title": "Pongal",
             "time_minutes": 60,
@@ -185,9 +180,7 @@ class PrivateRecipeApiTest(TestCase):
         self.assertEqual(recipe.tag.count(), 2)
         self.assertIn(tag_indian, recipe.tag.all())
         for tag in payload["tags"]:
-            exists = recipe.tag.filter(
-                name=tag["name"], user=self.user
-            ).exists()
+            exists = recipe.tag.filter(name=tag["name"], user=self.user).exists()
             self.assertTrue(exists)
 
     def test_creste_tag_on_update(self):
@@ -204,15 +197,11 @@ class PrivateRecipeApiTest(TestCase):
 
     def test_update_recipe_assign_tag(self):
         """Test assigining an existing ta when updating a recipe."""
-        tag_breakfast = Tag.objects.create(
-            user=self.user, name="Breakfast"
-        )
+        tag_breakfast = Tag.objects.create(user=self.user, name="Breakfast")
         recipe = create_recipe(user=self.user)
         recipe.tag.add(tag_breakfast)
 
-        tag_lunch = Tag.objects.create(
-            user=self.user, name="Lunch"
-        )
+        tag_lunch = Tag.objects.create(user=self.user, name="Lunch")
         payload = {"tags": [{"name": "Lunch"}]}
         url = detail_url(recipe.id)
         res = self.client.patch(url, payload, format="json")
@@ -257,9 +246,7 @@ class PrivateRecipeApiTest(TestCase):
 
     def test_create_recipe_with_existing_ingredient(self):
         """Test creating a new recipe with existing ingredinet."""
-        ingredient = Ingredient.objects.create(
-            user=self.user, name="Lemon"
-        )
+        ingredient = Ingredient.objects.create(user=self.user, name="Lemon")
         payload = {
             "title": "Vietnamese Soup",
             "time_minutes": 25,
@@ -290,22 +277,16 @@ class PrivateRecipeApiTest(TestCase):
         res = self.client.patch(url, payload, format="json")
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        new_ingeredient = Ingredient.objects.get(
-            user=self.user, name="Limes"
-        )
+        new_ingeredient = Ingredient.objects.get(user=self.user, name="Limes")
         self.assertIn(new_ingeredient, recipe.ingredient.all())
 
     def test_update_recipe_assign_ingredient(self):
         """Test assigining an existing an ingredient when updating a recipe."""
-        ingredient1 = Ingredient.objects.create(
-            user=self.user, name="Pepper"
-        )
+        ingredient1 = Ingredient.objects.create(user=self.user, name="Pepper")
         recipe = create_recipe(user=self.user)
         recipe.ingredient.add(ingredient1)
 
-        ingredient2 = Ingredient.objects.create(
-            user=self.user, name="Chili"
-        )
+        ingredient2 = Ingredient.objects.create(user=self.user, name="Chili")
         payload = {"ingredients": [{"name": "Chili"}]}
         url = detail_url(recipe.id)
         res = self.client.patch(url, payload, format="json")
@@ -316,8 +297,7 @@ class PrivateRecipeApiTest(TestCase):
 
     def test_clear_recipe_ingredients(self):
         """Test clearing a recipe ingredients."""
-        ingredient = Ingredient.objects.create()
-        user=self.user, name="Garlic"
+        ingredient = Ingredient.objects.create(user=self.user, name="Garlic")
         recipe = create_recipe(user=self.user)
         recipe.ingredient.add(ingredient)
 
