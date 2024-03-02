@@ -27,8 +27,10 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for Recipe"""
 
-    tags = TagSerializer(many=True, required=False)
-    ingredients = IngredientSerializer(many=True, required=False)
+    tags = TagSerializer(many = True, required = False)
+    ingredients = IngredientSerializer(
+        many = True, required = False
+    )
 
     class Meta:
         model = Recipe
@@ -48,7 +50,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         auth_user = self.context["request"].user
         for tag in tags:
             tag_obj, created = Tag.objects.get_or_create(
-                user=auth_user,
+                user = auth_user,
                 **tag,
             )
             recipe.tag.add(tag_obj)
@@ -58,7 +60,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         auth_user = self.context["request"].user
         for ingredient in ingredients:
             ingredient_obj, created = Ingredient.objects.get_or_create(
-                user=auth_user,
+                user = auth_user,
                 **ingredient,
             )
             recipe.ingredient.add(ingredient_obj)
@@ -96,7 +98,8 @@ class RecipeDetailSerializer(RecipeSerializer):
     """Serializer for detail recipe"""
 
     class Meta(RecipeSerializer.Meta):
-        fields = RecipeSerializer.Meta.fields + ["description", "image"]
+        fields = RecipeSerializer.Meta.fields + \
+        ["description", "image"]
 
 
 class RecipeImageSerializer(serializers.ModelSerializer):
@@ -107,4 +110,5 @@ class RecipeImageSerializer(serializers.ModelSerializer):
         fields = ["id", "image"]
         read_only = ["id"]
         extra_kwargs = {"image": {"required": "True"}}
-        
+
+

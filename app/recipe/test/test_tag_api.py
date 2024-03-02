@@ -16,13 +16,13 @@ TAGS_URL = reverse("recipe:tag-list")
 
 def detail_url(tag_id):
     """Create and return tga datial URL."""
-    return reverse("recipe:tag-detail", args=[tag_id])
+    return reverse("recipe:tag-detail", args = [tag_id])
 
 
-def create_user(email="test@example.com", password="testpass123"):
+def create_user(email = "test@example.com", password = "testpass123"):
     """Creating and return a new user."""
     return get_user_model().objects.create_user(
-        email=email, password=password
+        email = email, password = password
     )
 
 
@@ -47,16 +47,16 @@ class PrivateTagApiTest(TestCase):
         self.user = get_user_model().objects.create_user(
             "test@example.com", "testpass123"
         )
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user = self.user)
 
     def test_retrieve_tags(self):
         """Test a retrieveing a list of tags."""
-        Tag.objects.create(user=self.user, name="Vegan")
-        Tag.objects.create(user=self.user, name="Desert")
+        Tag.objects.create(user = self.user, name = "Vegan")
+        Tag.objects.create(user = self.user, name = "Desert")
 
         res = self.client.get(TAGS_URL)
         tags = Tag.objects.all().order_by("-name")
-        seralizer = TagSerializer(tags, many=True)
+        seralizer = TagSerializer(tags, many = True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, seralizer.data)
@@ -67,9 +67,10 @@ class PrivateTagApiTest(TestCase):
             "other@example.com",
             "password123",
         )
-        Tag.objects.create(user=other_user, name="Fruity")
+        Tag.objects.create(user = other_user, name = "Fruity")
         tags = Tag.objects.create(
-            user=self.user, name="Comfort Food"
+            user = self.user,
+            name = "Comfort Food"
         )
         res = self.client.get(TAGS_URL)
 
@@ -81,7 +82,8 @@ class PrivateTagApiTest(TestCase):
     def test_update_tag(self):
         """Test update tags."""
         tag = Tag.objects.create(
-            user=self.user, name="After Dinner"
+            user = self.user,
+            name = "After Dinner"
         )
         payload = {"name": "Desert"}
         url = detail_url(tag.id)
@@ -94,20 +96,25 @@ class PrivateTagApiTest(TestCase):
     def test_delete_tags(self):
         """Test deleting a tag."""
         tag = Tag.objects.create(
-            user=self.user, name="Breakfast"
+            user = self.user,
+            name = "Breakfast"
         )
 
         url = detail_url(tag.id)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-        tags = Tag.objects.filter(user=self.user)
+        tags = Tag.objects.filter(user = self.user)
         self.assertFalse(tags.exists())
 
     def test_filter_tags_assigned_to_recipes(self):
         """Test listing tags to those assigned to recipes."""
-        tag1 = Tag.objects.create(user=self.user, name = 'Breakfast')
-        tag2 = Tag.objects.create(user=self.user, name = 'Lunch')
+        tag1 = Tag.objects.create(
+            user = self.user, name = 'Breakfast'
+        )
+        tag2 = Tag.objects.create(
+            user = self.user, name = 'Lunch'
+        )
         recipe = Recipe.objects.create(
             title = 'Green Eggs on Toast',
             time_minutes = 10,
@@ -125,8 +132,11 @@ class PrivateTagApiTest(TestCase):
 
     def test_filtered_tags_unique(self):
         """Test filtering tags returns a unique list."""
-        tag = Tag.objects.create(user=self.user, name='Breakfast')
-        Tag.objects.create(user=self.user, name='Dinner')
+        tag = Tag.objects.create(
+            user = self.user,
+            name = 'Breakfast'
+        )
+        Tag.objects.create(user = self.user, name = 'Dinner')
         recipe1 = Recipe.objects.create(
             title = 'Panckaes',
             time_minutes = 5,
@@ -144,3 +154,4 @@ class PrivateTagApiTest(TestCase):
 
         res = self.client.get(TAGS_URL, {'assigned_only': 1})
         self.assertEqual(len(res.data), 1)
+
