@@ -17,8 +17,8 @@ def recipe_image_file_path(instance, filename):
     """Generate file path for new recipe image."""
     ext = os.path.splitext(filename)[1]
     filename = f'{uuid.uuid4()}{ext}'
-
     return os.path.join('uploads', 'recipe', filename)
+
 
 class UserManager(BaseUserManager):
     """Manager for user"""
@@ -33,9 +33,7 @@ class UserManager(BaseUserManager):
         )
         user.set_password(password)
         user.save(using=self._db)
-
         return user
-
 
     def create_superuser(self, email, password):
         """Create and return a new superuser"""
@@ -43,7 +41,6 @@ class UserManager(BaseUserManager):
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
-
         return user
 
 
@@ -76,7 +73,6 @@ class Recipe(models.Model):
     ingredient = models.ManyToManyField("Ingredient")
     image = models.ImageField(null=True, upload_to=recipe_image_file_path)
 
-
     def __str__(self):
         return f"{self.title}"
 
@@ -89,7 +85,6 @@ class Tag(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
-
 
     def __str__(self):
         return f"{self.name}"
@@ -104,6 +99,6 @@ class Ingredient(models.Model):
         on_delete=models.CASCADE,
     )
 
-
     def __str__(self):
         return f"{self.name}"
+

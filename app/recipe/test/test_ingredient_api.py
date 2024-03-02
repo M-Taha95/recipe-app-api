@@ -150,5 +150,7 @@ class PrivateIngredientTest(TestCase):
         recipe2.ingredient.add(ingredient)
         res = self.client.get(INGREDIENT_URL, {"assigned_only": 1})
         self.assertEqual(len(res.data), 1)
-        
+
+
+
 
