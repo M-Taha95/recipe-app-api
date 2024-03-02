@@ -14,11 +14,13 @@ def detail_url(tag_id):
     """Create and return tag detail URL."""
     return reverse("recipe:tag-detail", args=[tag_id])
 
+
 def create_user(email="test@example.com", password="testpass123"):
     """Create and return a new user."""
     return get_user_model().objects.create_user(
         email=email, password=password
     )
+
 
 class PublicTagApiTest(TestCase):
     """Test unauthenticated for retrieving tags"""
@@ -123,7 +125,3 @@ class PrivateTagApiTest(TestCase):
         recipe2.tag.add(tag)
         res = self.client.get(TAGS_URL, {"assigned_only": 1})
         self.assertEqual(len(res.data), 1)
-
-
-
-

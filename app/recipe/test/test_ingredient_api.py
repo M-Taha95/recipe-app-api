@@ -14,11 +14,13 @@ def detail_url(ingredient_id):
     """Create and return ingredient URL."""
     return reverse("recipe:ingredient-detail", args=[ingredient_id])
 
+
 def create_user(email="test@example.com", password="testpass123"):
     """Creating and return a new user."""
     return get_user_model().objects.create_user(
         email=email, password=password
     )
+
 
 class PublicIngredientTest(TestCase):
     """Test unauthenticated for retrieveing an ingredients."""
@@ -30,6 +32,7 @@ class PublicIngredientTest(TestCase):
         """Test auth is required to call API."""
         res = self.client.get(INGREDIENT_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivateIngredientTest(TestCase):
     """Test Authenticated API requests."""
@@ -136,9 +139,3 @@ class PrivateIngredientTest(TestCase):
         recipe2.ingredient.add(ingredient)
         res = self.client.get(INGREDIENT_URL, {"assigned_only": 1})
         self.assertEqual(len(res.data), 1)
-
-
-
-
-
-
