@@ -1,7 +1,3 @@
-"""
-Test an Ingredient API.
-"""
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -18,6 +14,7 @@ def detail_url(ingredient_id):
     """Create and return ingredient URL."""
     return reverse("recipe:ingredient-detail", args=[ingredient_id])
 
+
 def create_user(email="test@example.com", password="testpass123"):
     """Creating and return a new user."""
     return get_user_model().objects.create_user(
@@ -26,10 +23,11 @@ def create_user(email="test@example.com", password="testpass123"):
 
 
 class PublicIngredientTest(TestCase):
-    """Test unauthenticated for retrieving ingredients."""
+    """Test unauthenticated for retrieveing an ingredients."""
 
     def setUp(self):
         self.client = APIClient()
+
 
     def test_auth_required(self):
         """Test auth is required to call API."""
@@ -48,19 +46,21 @@ class PrivateIngredientTest(TestCase):
         )
         self.client.force_authenticate(user=self.user)
 
+
     def test_retrieve_ingredients(self):
-        """Test retrieving a list of ingredients."""
+        """Test a retrieveing a list of an ingredients."""
         Ingredient.objects.create(user=self.user, name="Kali")
         Ingredient.objects.create(user=self.user, name="Ubuntu")
 
         res = self.client.get(INGREDIENT_URL)
-        ingredients = Ingredient.objects.all().order_by("-name")
-        serializer = IngredientSerializer(ingredients, many=True)
+        ingredient = Ingredient.objects.all().order_by("-name")
+        serializer = IngredientSerializer(ingredient, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_ingredient_list_limited_to_user(self):
-        """Test list of ingredients is limited to authenticated users."""
+
+    def test_ingredient_list_limied_to_user(self):
+        """Test list of an ingredients is limited to authenticated users."""
         user2 = get_user_model().objects.create_user(
             "user2@example.com",
             "testpass123",
@@ -75,8 +75,9 @@ class PrivateIngredientTest(TestCase):
         self.assertEqual(res.data[0]["name"], ingredient.name)
         self.assertEqual(res.data[0]["id"], ingredient.id)
 
+
     def test_update_ingredient(self):
-        """Test updating an ingredient."""
+        """Test for updaing an ingredients."""
         ingredient = Ingredient.objects.create(
             user=self.user, name="Cilantro"
         )
@@ -88,16 +89,18 @@ class PrivateIngredientTest(TestCase):
         ingredient.refresh_from_db()
         self.assertEqual(ingredient.name, payload["name"])
 
-    def test_delete_ingredient(self):
-        """Test deleting an ingredient."""
+
+    def test_delete_ingrediant(self):
+        """Test for deleting an ingredients."""
         ingredient = Ingredient.objects.create(
             user=self.user, name="Taha"
         )
         url = detail_url(ingredient.id)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-        ingredients = Ingredient.objects.filter(user=self.user)
-        self.assertFalse(ingredients.exists())
+        ingredient = Ingredient.objects.filter(user=self.user)
+        self.assertFalse(ingredient.exists())
+
 
     def test_filter_ingredients_assigned_to_recipes(self):
         """Test listing ingredients by those assigned to recipes."""
@@ -105,7 +108,7 @@ class PrivateIngredientTest(TestCase):
             user=self.user, name="Apples"
         )
         ingredient2 = Ingredient.objects.create(
-            user=self.user, name="Turkey"
+            user=self.user, name="Turky"
         )
         recipe = Recipe.objects.create(
             title="Apple Crumble",
@@ -119,6 +122,7 @@ class PrivateIngredientTest(TestCase):
         s2 = IngredientSerializer(ingredient2)
         self.assertIn(s1.data, res.data)
         self.assertNotIn(s2.data, res.data)
+
 
     def test_filtered_ingredients_unique(self):
         """Test filtering ingredients returns a unique list."""
@@ -142,6 +146,7 @@ class PrivateIngredientTest(TestCase):
         recipe2.ingredient.add(ingredient)
         res = self.client.get(INGREDIENT_URL, {"assigned_only": 1})
         self.assertEqual(len(res.data), 1)
+        
 
 
 

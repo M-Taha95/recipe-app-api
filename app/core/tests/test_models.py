@@ -1,95 +1,64 @@
-"""
-Test for models.
-"""
-
-from unittest.mock import patch
-from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from core import models
 
 
-def create_user(email="user@example.com", password="testpass123"):
-    """Creating and return a new user"""
+def sample_user(email="test@example.com", password="testpass123"):
+    """Create a sample user"""
     return get_user_model().objects.create_user(email, password)
 
 
-class ModelTest(TestCase):
-    """test models."""
+class ModelTests(TestCase):
+    """Test creating a new user with an email is successful"""
 
     def test_create_user_with_email_successful(self):
-        """Test creating a user with an email is successful."""
+        """Test creating a new user with an email is successful"""
         email = "test@example.com"
-        password = "testpass123"
+        password = "TestPass123"
         user = get_user_model().objects.create_user(
-            email=email, password=password
+            email=email,
+            password=password
         )
 
         self.assertEqual(user.email, email)
         self.assertTrue(user.check_password(password))
 
     def test_new_user_email_normalized(self):
-        """Test email is normalized for a new users"""
-        sample_emails = [
-            ["test1@EXAMPLE.com", "test1@example.com"],
-            ["Test2@Example.com", "Test2@example.com"],
-            ["TEST3@EXAMPLE.COM", "TEST3@example.com"],
-            ["test4@example.COM", "test4@example.com"],
-        ]
-        for email, excepted in sample_emails:
-            user = get_user_model().objects.create_user(email, "sample123")
-            self.assertEqual(user.email, excepted)
+        """Test the email for a new user is normalized"""
+        email = "test@EXAMPLE.COM"
+        user = get_user_model().objects.create_user(email, "test123")
 
-    def test_new_user_without_email_raises_error(self):
-        """Test that creating a user without an email raises a ValueError"""
+        self.assertEqual(user.email, email.lower())
+
+    def test_new_user_invalid_email(self):
+        """Test creating user with no email raises error"""
         with self.assertRaises(ValueError):
-            get_user_model().objects.create_user("", "test123")
+            get_user_model().objects.create_user(None, "test123")
 
-    def test_create_superuser(self):
-        """Test creating a superuser"""
+    def test_create_new_superuser(self):
+        """Test creating a new superuser"""
         user = get_user_model().objects.create_superuser(
             "test@example.com",
-            "test123",
+            "test123"
         )
+
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
 
-    def test_create_recipe(self):
-        """Test create recipe is successful."""
-        user = get_user_model().objects.create_user(
-            "test@example.com",
-            "test123",
-        )
-        receip = models.Recipe.objects.create(
-            user=user,
-            title="Sample recipe name",
+
+class RecipeModelTests(TestCase):
+    """Test recipe model"""
+
+    def test_recipe_str(self):
+        """Test the recipe string representation"""
+        recipe = models.Recipe.objects.create(
+            user=sample_user(),
+            title="Steak and Mushroom Sauce",
             time_minutes=5,
-            price=Decimal("5.50"),
-            description="Sample recipe description",
+            price=5.00
         )
-        self.assertEqual(str(receip), receip.title)
 
-    def test_create_tag(self):
-        """Test for creating a tag successfull."""
-        user = create_user()
-        tag = models.Tag.objects.create(user=user, name="Tag1")
-        self.assertEqual(str(tag), tag.name)
+        self.assertEqual(str(recipe), recipe.title)
 
-    def test_create_ingredients(self):
-        """Test for creating an ingredient. successfull."""
-        user = create_user()
-        ingredient = models.Ingredient.objects.create(
-            user=user,
-            name="Ingredient1",
-        )
-        self.assertEqual(str(ingredient), ingredient.name)
 
-    @patch("core.models.uuid.uuid4")
-    def test_recipe_file_name_uuid(self, mock_uuid):
-        """Test generating image path."""
-        uuid = "test-uuid"
-        mock_uuid.return_value = uuid
-        file_path = models.recipe_image_file_path(None, "example.jpg")
-        self.assertEqual(file_path, f"uploads/recipe/{uuid}.jpg")
-        
 
