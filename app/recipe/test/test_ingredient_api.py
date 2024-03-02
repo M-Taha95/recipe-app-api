@@ -32,10 +32,10 @@ class PublicIngredientTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
+
     def test_auth_required(self):
         """Test auth is required to call API."""
         res = self.client.get(INGREDIENT_URL)
-
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -50,6 +50,7 @@ class PrivateIngredientTest(TestCase):
         )
         self.client.force_authenticate(user=self.user)
 
+
     def test_retrieve_ingredients(self):
         """Test a retrieveing a list of an ingredients."""
         Ingredient.objects.create(user=self.user, name="Kali")
@@ -58,9 +59,9 @@ class PrivateIngredientTest(TestCase):
         res = self.client.get(INGREDIENT_URL)
         ingredient = Ingredient.objects.all().order_by("-name")
         serializer = IngredientSerializer(ingredient, many=True)
-
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
 
     def test_ingredient_list_limied_to_user(self):
         """Test list of an ingredients is limited to authenticated users."""
@@ -72,13 +73,12 @@ class PrivateIngredientTest(TestCase):
         ingredient = Ingredient.objects.create(
             user=self.user, name="Pepper"
         )
-
         res = self.client.get(INGREDIENT_URL)
-
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]["name"], ingredient.name)
         self.assertEqual(res.data[0]["id"], ingredient.id)
+
 
     def test_update_ingredient(self):
         """Test for updaing an ingredients."""
@@ -93,6 +93,7 @@ class PrivateIngredientTest(TestCase):
         ingredient.refresh_from_db()
         self.assertEqual(ingredient.name, payload["name"])
 
+
     def test_delete_ingrediant(self):
         """Test for deleting an ingredients."""
         ingredient = Ingredient.objects.create(
@@ -100,10 +101,10 @@ class PrivateIngredientTest(TestCase):
         )
         url = detial_url(ingredient.id)
         res = self.client.delete(url)
-
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         ingredient = Ingredient.objects.filter(user=self.user)
         self.assertFalse(ingredient.exists())
+
 
     def test_filter_ingredients_assigned_to_recipes(self):
         """Test listing ingredients by those assigned to recipes."""
@@ -120,12 +121,12 @@ class PrivateIngredientTest(TestCase):
             user=self.user,
         )
         recipe.ingredient.add(ingredient1)
-
         res = self.client.get(INGREDIENT_URL, {"assigned_only": 1})
         s1 = IngredientSerializer(ingredient1)
         s2 = IngredientSerializer(ingredient2)
         self.assertIn(s1.data, res.data)
         self.assertNotIn(s2.data, res.data)
+
 
     def test_filtered_ingredients_unique(self):
         """Test filtering ingredients returns a unique list."""
@@ -147,7 +148,7 @@ class PrivateIngredientTest(TestCase):
         )
         recipe1.ingredient.add(ingredient)
         recipe2.ingredient.add(ingredient)
-
         res = self.client.get(INGREDIENT_URL, {"assigned_only": 1})
         self.assertEqual(len(res.data), 1)
         
+

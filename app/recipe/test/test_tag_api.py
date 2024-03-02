@@ -32,10 +32,10 @@ class PublicTagApiTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
+
     def test_auth_required(self):
         """Test auth is required to call API."""
         res = self.client.get(TAGS_URL)
-
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -49,17 +49,18 @@ class PrivateTagApiTest(TestCase):
         )
         self.client.force_authenticate(user=self.user)
 
+
     def test_retrieve_tags(self):
         """Test a retrieveing a list of tags."""
         Tag.objects.create(user=self.user, name="Vegan")
         Tag.objects.create(user=self.user, name="Desert")
-
         res = self.client.get(TAGS_URL)
         tags = Tag.objects.all().order_by("-name")
         seralizer = TagSerializer(tags, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, seralizer.data)
+
 
     def test_tags_list_limited_to_user(self):
         """Test list of tags is limited to authenticated users."""
@@ -70,11 +71,11 @@ class PrivateTagApiTest(TestCase):
         Tag.objects.create(user=other_user, name="Fruity")
         tags = Tag.objects.create(user=self.user, name="Comfort Food")
         res = self.client.get(TAGS_URL)
-
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]["name"], tags.name)
         self.assertEqual(res.data[0]["id"], tags.id)
+
 
     def test_update_tag(self):
         """Test update tags."""
@@ -82,21 +83,20 @@ class PrivateTagApiTest(TestCase):
         payload = {"name": "Desert"}
         url = detail_url(tag.id)
         res = self.client.patch(url, payload)
-
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         tag.refresh_from_db()
         self.assertEqual(tag.name, payload["name"])
 
+
     def test_delete_tags(self):
         """Test deleting a tag."""
         tag = Tag.objects.create(user=self.user, name="Breakfast")
-
         url = detail_url(tag.id)
         res = self.client.delete(url)
-
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         tags = Tag.objects.filter(user=self.user)
         self.assertFalse(tags.exists())
+
 
     def test_filter_tags_assigned_to_recipes(self):
         """Test listing tags to those assigned to recipes."""
@@ -109,13 +109,12 @@ class PrivateTagApiTest(TestCase):
             user=self.user,
         )
         recipe.tag.add(tag1)
-
         res = self.client.get(TAGS_URL, {"assigned_only": 1})
-
         s1 = TagSerializer(tag1)
         s2 = TagSerializer(tag2)
         self.assertIn(s1.data, res.data)
         self.assertNotIn(s2.data, res.data)
+
 
     def test_filtered_tags_unique(self):
         """Test filtering tags returns a unique list."""
@@ -135,7 +134,7 @@ class PrivateTagApiTest(TestCase):
         )
         recipe1.tag.add(tag)
         recipe2.tag.add(tag)
-
         res = self.client.get(TAGS_URL, {"assigned_only": 1})
         self.assertEqual(len(res.data), 1)
         
+
