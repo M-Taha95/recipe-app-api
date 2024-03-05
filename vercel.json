@@ -7,7 +7,7 @@
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "app/wsgi.py"
+            "dest": "/"
         }
     ]
 }
