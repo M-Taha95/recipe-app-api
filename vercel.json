@@ -21,7 +21,7 @@
       },
       {
         "src": "/(.*)",
-        "dest": "app/wsgi.py"
+        "dest": "/hello.html"
       }
     ]
   }
